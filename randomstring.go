@@ -2,8 +2,10 @@ package randomstring
 
 import (
 	"crypto/rand"
+	"fmt"
 	"math/big"
 	"strings"
+	"time"
 )
 
 func CharSet(token string, length int) Generator {
@@ -33,6 +35,13 @@ func Fix(token string) Generator {
 	}
 }
 
+func Now(layout string) Generator {
+	return func(buf *strings.Builder) (*strings.Builder, error) {
+		buf.WriteString(time.Now().Format(layout))
+		return buf, nil
+	}
+}
+
 func Numbers(length int) Generator {
 	return CharSet("0123456789", length)
 }
@@ -43,6 +52,13 @@ func Uppers(length int) Generator {
 
 func Lowers(length int) Generator {
 	return CharSet("abcdefghijklmnopqrstuvwxyz", length)
+}
+
+func Format(format string, a ...any) Generator {
+	return func(buf *strings.Builder) (*strings.Builder, error) {
+		buf.WriteString(fmt.Sprintf(format, a...))
+		return buf, nil
+	}
 }
 
 type Generator func(buf *strings.Builder) (*strings.Builder, error)
