@@ -1,6 +1,10 @@
 package randomstring
 
-import "testing"
+import (
+	"strings"
+	"testing"
+	"time"
+)
 
 func TestGen(t *testing.T) {
 	value := Gen(Grow(30), Fix("A"), Now("200601021504"), Numbers(1), Lowers(5), Uppers(3), Format("%05d", 1))
@@ -10,9 +14,18 @@ func TestGen(t *testing.T) {
 }
 
 func TestGen2(t *testing.T) {
-	value := Gen(Grow(70), AlphaNumeric(10), All(10), Base64(10), Base64Url(10), LowersAlphaNumeric(10), UppersAlphaNumeric(10), SymbolAll(10))
-	if len(value) != 70 {
-		t.Errorf("expect=%d actual=%d", 70, len(value))
+	value := Gen(Grow(90), Now(time.RFC3339, time.UTC), AlphaNumeric(10), All(10), Base64(10), Base64Url(10), LowersAlphaNumeric(10), UppersAlphaNumeric(10), SymbolAll(10))
+	if len(value) != 90 {
+		t.Errorf("expect=%d actual=%d", 90, len(value))
+	}
+}
+
+func TestBuilder(t *testing.T) {
+	buf := &strings.Builder{}
+	buf.WriteString("*TEST*")
+	value := Gen(Fix("Prefix"), Builder(buf), Now(time.RFC3339, time.UTC), AlphaNumeric(10))
+	if value[6:12] != "*TEST*" {
+		t.Errorf("expect=%s actual=%s", "*TEST*", value[6:12])
 	}
 }
 
