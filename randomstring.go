@@ -21,6 +21,23 @@ func CharSet(token string, length int) Generator {
 	}
 }
 
+func Builder(builder *strings.Builder) Generator {
+	return func(buf *strings.Builder) (*strings.Builder, error) {
+		if buf.Len() > 0 {
+			capacity := builder.Cap()
+			buf.WriteString(builder.String())
+			builder.Reset()
+			if buf.Cap() > capacity {
+				builder.Grow(buf.Cap())
+			} else {
+				builder.Grow(capacity)
+			}
+			builder.WriteString(buf.String())
+		}
+		return builder, nil
+	}
+}
+
 func Grow(length int) Generator {
 	return func(buf *strings.Builder) (*strings.Builder, error) {
 		buf.Grow(length)
@@ -35,9 +52,13 @@ func Fix(token string) Generator {
 	}
 }
 
-func Now(layout string) Generator {
+func Now(layout string, loc ...*time.Location) Generator {
 	return func(buf *strings.Builder) (*strings.Builder, error) {
-		buf.WriteString(time.Now().Format(layout))
+		now := time.Now()
+		if len(loc) > 0 {
+			now = now.In(loc[0])
+		}
+		buf.WriteString(now.Format(layout))
 		return buf, nil
 	}
 }
