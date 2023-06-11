@@ -9,6 +9,13 @@ func TestGen(t *testing.T) {
 	}
 }
 
+func TestGen2(t *testing.T) {
+	value := Gen(Grow(70), AlphaNumeric(10), All(10), Base64(10), Base64Url(10), LowersAlphaNumeric(10), UppersAlphaNumeric(10), SymbolAll(10))
+	if len(value) != 70 {
+		t.Errorf("expect=%d actual=%d", 70, len(value))
+	}
+}
+
 func BenchmarkGen(b *testing.B) {
 	value := Gen(Fix("A"), Numbers(1), Lowers(5), Uppers(3), Fix("Z"))
 	if len(value) != 11 {

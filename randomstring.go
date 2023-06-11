@@ -54,6 +54,34 @@ func Lowers(length int) Generator {
 	return CharSet("abcdefghijklmnopqrstuvwxyz", length)
 }
 
+func AlphaNumeric(length int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length)
+}
+
+func All(length int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length)
+}
+
+func Base64(length int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/", length)
+}
+
+func Base64Url(length int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", length)
+}
+
+func LowersAlphaNumeric(length int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyz0123456789", length)
+}
+
+func UppersAlphaNumeric(length int) Generator {
+	return CharSet("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length)
+}
+
+func SymbolAll(length int) Generator {
+	return CharSet("-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length)
+}
+
 func Format(format string, a ...any) Generator {
 	return func(buf *strings.Builder) (*strings.Builder, error) {
 		buf.WriteString(fmt.Sprintf(format, a...))
