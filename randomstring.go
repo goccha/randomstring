@@ -1,21 +1,23 @@
 package randomstring
 
 import (
-	"crypto/rand"
 	"fmt"
-	"math/big"
+	"math/rand"
 	"strings"
 	"time"
 )
 
-func CharSet(token string, length int) Generator {
+func CharSet(token string, length int, maxLength ...int) Generator {
+	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return func(buf *strings.Builder) (*strings.Builder, error) {
+		if len(maxLength) > 0 && maxLength[0] > length {
+			min := length
+			max := maxLength[0]
+			length = seed.Intn(max-min+1) + min
+		}
 		for i := 0; i < length; i++ {
-			v, err := rand.Int(rand.Reader, big.NewInt(int64(len(token))))
-			if err != nil {
-				return buf, err
-			}
-			buf.WriteByte(token[v.Int64()])
+			v := seed.Intn(len(token))
+			buf.WriteByte(token[v])
 		}
 		return buf, nil
 	}
@@ -63,44 +65,44 @@ func Now(layout string, loc ...*time.Location) Generator {
 	}
 }
 
-func Numbers(length int) Generator {
-	return CharSet("0123456789", length)
+func Numbers(length int, maxLength ...int) Generator {
+	return CharSet("0123456789", length, maxLength...)
 }
 
-func Uppers(length int) Generator {
-	return CharSet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", length)
+func Uppers(length int, maxLength ...int) Generator {
+	return CharSet("ABCDEFGHIJKLMNOPQRSTUVWXYZ", length, maxLength...)
 }
 
-func Lowers(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyz", length)
+func Lowers(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyz", length, maxLength...)
 }
 
-func AlphaNumeric(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length)
+func AlphaNumeric(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length, maxLength...)
 }
 
-func All(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length)
+func All(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length, maxLength...)
 }
 
-func Base64(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/", length)
+func Base64(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/", length, maxLength...)
 }
 
-func Base64Url(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", length)
+func Base64Url(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", length, maxLength...)
 }
 
-func LowersAlphaNumeric(length int) Generator {
-	return CharSet("abcdefghijklmnopqrstuvwxyz0123456789", length)
+func LowersAlphaNumeric(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyz0123456789", length, maxLength...)
 }
 
-func UppersAlphaNumeric(length int) Generator {
-	return CharSet("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length)
+func UppersAlphaNumeric(length int, maxLength ...int) Generator {
+	return CharSet("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", length, maxLength...)
 }
 
-func SymbolAll(length int) Generator {
-	return CharSet("-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length)
+func SymbolAll(length int, maxLength ...int) Generator {
+	return CharSet("-_#$=?@[]!%&'()~|^\\;:,./`{+*}>", length, maxLength...)
 }
 
 func Format(format string, a ...any) Generator {

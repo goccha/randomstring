@@ -1,6 +1,7 @@
 package randomstring
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -18,6 +19,14 @@ func TestGen2(t *testing.T) {
 	if len(value) != 90 {
 		t.Errorf("expect=%d actual=%d", 90, len(value))
 	}
+}
+
+func TestGen3(t *testing.T) {
+	value := Gen(Grow(45), Now(time.RFC3339, time.UTC), Numbers(10, 20))
+	if !(len(value) >= 31 && len(value) <= 41) {
+		t.Errorf("expect=(35 <= x <= 45) actual=%d", len(value))
+	}
+	fmt.Println(value)
 }
 
 func TestBuilder(t *testing.T) {
