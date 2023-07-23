@@ -1,6 +1,6 @@
 # randomstring
-固定長ランダム文字列生成ライブラリ
-- Fixed-length random string generation
+ランダム文字列生成ライブラリ
+- random string generation
 
 ## QuickStart
 ```go
@@ -17,6 +17,22 @@ func main() {
 		randomstring.Uppers(3),   // ABCDEFGHIJKLMNOPQRSTUVWXYZ
 		randomstring.Format("%05d", 1))
 	
+	println(str)
+} 
+
+```
+## 文字列長範囲指定
+- Character string length range specification
+```go
+package main
+
+import "github.com/goccha/randomstring"
+
+func main() {
+	var str = randomstring.Gen(
+		randomstring.Grow(15), 
+		randomstring.Numbers(10, 15))  // 0123456789
+        
 	println(str)
 } 
 
