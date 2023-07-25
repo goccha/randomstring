@@ -8,8 +8,7 @@ import (
 )
 
 func CharSet(token string, length int, maxLength ...int) Generator {
-	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		if len(maxLength) > 0 && maxLength[0] > length {
 			min := length
 			max := maxLength[0]
@@ -24,7 +23,7 @@ func CharSet(token string, length int, maxLength ...int) Generator {
 }
 
 func Builder(builder *strings.Builder) Generator {
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		if buf.Len() > 0 {
 			capacity := builder.Cap()
 			buf.WriteString(builder.String())
@@ -41,21 +40,28 @@ func Builder(builder *strings.Builder) Generator {
 }
 
 func Grow(length int) Generator {
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		buf.Grow(length)
 		return buf, nil
 	}
 }
 
-func Fix(token string) Generator {
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+func Fix(token string, options ...string) Generator {
+	if len(options) > 0 {
+		options = append([]string{token}, options...)
+		return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
+			buf.WriteString(options[seed.Intn(len(options))])
+			return buf, nil
+		}
+	}
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		buf.WriteString(token)
 		return buf, nil
 	}
 }
 
 func Now(layout string, loc ...*time.Location) Generator {
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		now := time.Now()
 		if len(loc) > 0 {
 			now = now.In(loc[0])
@@ -106,19 +112,20 @@ func SymbolAll(length int, maxLength ...int) Generator {
 }
 
 func Format(format string, a ...any) Generator {
-	return func(buf *strings.Builder) (*strings.Builder, error) {
+	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		buf.WriteString(fmt.Sprintf(format, a...))
 		return buf, nil
 	}
 }
 
-type Generator func(buf *strings.Builder) (*strings.Builder, error)
+type Generator func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error)
 
 func Build(gen ...Generator) (string, error) {
 	buf := &strings.Builder{}
+	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var err error
 	for _, f := range gen {
-		buf, err = f(buf)
+		buf, err = f(buf, seed)
 		if err != nil {
 			return "", err
 		}

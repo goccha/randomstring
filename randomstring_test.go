@@ -23,10 +23,22 @@ func TestGen2(t *testing.T) {
 
 func TestGen3(t *testing.T) {
 	value := Gen(Grow(45), Now(time.RFC3339, time.UTC), Numbers(10, 20))
-	if !(len(value) >= 31 && len(value) <= 41) {
-		t.Errorf("expect=(35 <= x <= 45) actual=%d", len(value))
+	if !(len(value) >= 30 && len(value) <= 40) {
+		t.Errorf("expect=(30 <= x <= 40) actual=%d", len(value))
 	}
 	fmt.Println(value)
+}
+
+func TestGen4(t *testing.T) {
+	value := Gen(Grow(1), Fix("A", "B", "C"), Numbers(10))
+	if len(value) != 11 {
+		t.Errorf("expect=%d actual=%d", 11, len(value))
+	}
+	switch value[0] {
+	case 'A', 'B', 'C':
+	default:
+		t.Errorf("expect=%s actual=%s", "A or B or C", string(value[0]))
+	}
 }
 
 func TestBuilder(t *testing.T) {
