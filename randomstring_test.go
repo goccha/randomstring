@@ -1,7 +1,6 @@
 package randomstring
 
 import (
-	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -26,7 +25,6 @@ func TestGen3(t *testing.T) {
 	if !(len(value) >= 30 && len(value) <= 40) {
 		t.Errorf("expect=(30 <= x <= 40) actual=%d", len(value))
 	}
-	fmt.Println(value)
 }
 
 func TestGen4(t *testing.T) {
@@ -41,10 +39,46 @@ func TestGen4(t *testing.T) {
 	}
 }
 
-func TestBuilder(t *testing.T) {
+func TestGen5(t *testing.T) {
+	values := make([]string, 0, 5)
+	for i := 0; i < 5; i++ {
+		value := Gen(Grow(12), Fix("3"),
+			CharSet("23456789abcdefghijklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-/#@", 10),
+			Fix("5"))
+		if contains(values, value) {
+			t.Errorf("duplicate value=%s", value)
+		}
+		values = append(values, value)
+	}
+}
+
+func TestGen6(t *testing.T) {
+	values := make([]string, 0, 5)
+	builder := New()
+	for i := 0; i < 5; i++ {
+		value := builder.Gen(Grow(12), Fix("3"),
+			CharSet("23456789abcdefghijklmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ-/#@", 10),
+			Fix("5"))
+		if contains(values, value) {
+			t.Errorf("duplicate value=%s", value)
+		}
+		values = append(values, value)
+	}
+}
+
+func contains(s []string, v string) bool {
+	for i := range s {
+		if v == s[i] {
+			return true
+		}
+	}
+	return false
+}
+
+func TestMerge(t *testing.T) {
 	buf := &strings.Builder{}
 	buf.WriteString("*TEST*")
-	value := Gen(Fix("Prefix"), Builder(buf), Now(time.RFC3339, time.UTC), AlphaNumeric(10))
+	value := Gen(Fix("Prefix"), Merge(buf), Now(time.RFC3339, time.UTC), AlphaNumeric(10))
 	if value[6:12] != "*TEST*" {
 		t.Errorf("expect=%s actual=%s", "*TEST*", value[6:12])
 	}

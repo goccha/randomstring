@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 )
 
 func CharSet(token string, length int, maxLength ...int) Generator {
 	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		if len(maxLength) > 0 && maxLength[0] > length {
-			min := length
-			max := maxLength[0]
-			length = seed.Intn(max-min+1) + min
+			minLen := length
+			maxLen := maxLength[0]
+			length = seed.Intn(maxLen-minLen+1) + minLen
 		}
 		for i := 0; i < length; i++ {
 			v := seed.Intn(len(token))
@@ -22,7 +23,7 @@ func CharSet(token string, length int, maxLength ...int) Generator {
 	}
 }
 
-func Builder(builder *strings.Builder) Generator {
+func Merge(builder *strings.Builder) Generator {
 	return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
 		if buf.Len() > 0 {
 			capacity := builder.Cap()
@@ -120,12 +121,26 @@ func Format(format string, a ...any) Generator {
 
 type Generator func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error)
 
+var _builder = New()
+
 func Build(gen ...Generator) (string, error) {
+	return _builder.Build(gen...)
+}
+
+func Gen(gen ...Generator) string {
+	return _builder.Sync(gen...)
+}
+
+type Builder struct {
+	seed *rand.Rand
+	mux  sync.Mutex
+}
+
+func (b *Builder) Build(gen ...Generator) (string, error) {
 	buf := &strings.Builder{}
-	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var err error
 	for _, f := range gen {
-		buf, err = f(buf, seed)
+		buf, err = f(buf, b.seed)
 		if err != nil {
 			return "", err
 		}
@@ -133,10 +148,21 @@ func Build(gen ...Generator) (string, error) {
 	return buf.String(), nil
 }
 
-func Gen(gen ...Generator) string {
-	v, err := Build(gen...)
+func (b *Builder) Gen(gen ...Generator) string {
+	v, err := b.Build(gen...)
 	if err != nil {
 		panic(err)
 	}
 	return v
+}
+
+func (b *Builder) Sync(gen ...Generator) string {
+	b.mux.Lock()
+	defer b.mux.Unlock()
+	return b.Gen(gen...)
+}
+
+func New() *Builder {
+	seed := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return &Builder{seed: seed, mux: sync.Mutex{}}
 }
