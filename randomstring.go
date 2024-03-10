@@ -49,9 +49,11 @@ func Grow(length int) Generator {
 
 func Fix(token string, options ...string) Generator {
 	if len(options) > 0 {
-		options = append([]string{token}, options...)
+		tokens := make([]string, 0, len(options)+1)
+		tokens = append(tokens, token)
+		tokens = append(tokens, options...)
 		return func(buf *strings.Builder, seed *rand.Rand) (*strings.Builder, error) {
-			buf.WriteString(options[seed.Intn(len(options))])
+			buf.WriteString(tokens[seed.Intn(len(tokens))])
 			return buf, nil
 		}
 	}
@@ -98,6 +100,10 @@ func Base64(length int, maxLength ...int) Generator {
 
 func Base64Url(length int, maxLength ...int) Generator {
 	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_", length, maxLength...)
+}
+
+func Alphabet(length int, maxLength ...int) Generator {
+	return CharSet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", length, maxLength...)
 }
 
 func LowersAlphaNumeric(length int, maxLength ...int) Generator {
